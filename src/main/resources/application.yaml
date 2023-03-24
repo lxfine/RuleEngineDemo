@@ -47,10 +47,10 @@ liteflow:
     #监控日志打印每过多少时间执行一次，默认值为300000毫秒，也就是5分钟
     period: 300000
   rule-source-ext-data-map:
-    url: jdbc:mysql://161.189.107.168:3306/liteFlow?useUnicode=true&characterEncoding=UTF-8
+    url:
     driverClassName: com.mysql.cj.jdbc.Driver
-    username: lwj
-    password: b51f20d6b9720659
+    username:
+    password:
     applicationName: demo
     #以下是chain表的配置，这个一定得有
     chainTableName: chain
