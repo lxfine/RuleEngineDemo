@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow>
+    <nodes>
+        <node id="s1" name="普通脚本" type="switch_script" language="groovy">
+            <![CDATA[
+            import com.example.ruleenginedemo.liteFlow.dto.PlanConfigDTO;
+            import com.example.ruleenginedemo.liteFlow.dto.LipeiDTO;
+
+            List<PlanConfigDTO> planConfigs = testContext.planConfigs;
+            LipeiDTO lipeiDTO = testContext.lipeiDTO;
+            PlanConfigDTO planConfigDTO = planConfigs.find {
+                if (it.planCode == lipeiDTO.planCode) {
+                    return it;
+                }
+            }
+            if (planConfigDTO == null) {
+                return 'b';
+            } else {
+                planConfigDTO.planCode;
+//                if () {
+//
+//                }
+                return 'a';
+            }
+            ]]>
+        </node>
+        <node id="a" name="普通脚本" type="script" language="groovy">
+            <![CDATA[
+            import com.example.ruleenginedemo.liteFlow.dto.LipeiResultDTO;
+
+            LipeiResultDTO lipeiResultDTO = testContext.getLipeiResultDTO();
+            lipeiResultDTO.setFlag(Boolean.TRUE);
+            ]]>
+        </node>
+        <node id="b" name="普通脚本" type="script" language="groovy">
+            <![CDATA[
+            import com.example.ruleenginedemo.liteFlow.dto.LipeiResultDTO;
+
+            LipeiResultDTO lipeiResultDTO = testContext.getLipeiResultDTO();
+            lipeiResultDTO.setFlag(Boolean.FALSE);
+            ]]>
+        </node>
+
+    </nodes>
+
+    <chain name="chain1">
+        SWITCH(s1).TO(a,b);
+    </chain>
+</flow>
