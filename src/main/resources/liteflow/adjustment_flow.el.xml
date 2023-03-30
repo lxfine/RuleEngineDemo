@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow>
+    <nodes>
+        <node id="n1" name="判断发生金额是否超过免赔额" type="if_script" language="groovy">
+            <![CDATA[
+            BigDecimal amtIncurred = adjustmentReqContext.amtIncurred;
+            BigDecimal remainingDeductibles = adjustmentReqContext.remainingDeductibles;
+            if (amtIncurred > remainingDeductibles) {
+                return true;
+            } else {
+                return false;
+            }
+            ]]>
+        </node>
+        <node id="n2" name="发生金额超过免赔额，判断发生金额是否超过个人自付限额" type="if_script" language="groovy">
+            <![CDATA[
+            BigDecimal amtIncurred = adjustmentReqContext.amtIncurred;
+            BigDecimal remainingOop = adjustmentReqContext.remainingOop;
+            if (amtIncurred > remainingOop) {
+                return true;
+            } else {
+                return false;
+            }
+            ]]>
+        </node>
+
+        <node id="n3" name="发生金额未超过免赔额,直接返回" type="script" language="groovy">
+            <![CDATA[
+            BigDecimal amtIncurred = adjustmentReqContext.amtIncurred;
+            BigDecimal remainingDeductibles = adjustmentReqContext.remainingDeductibles;
+            BigDecimal remainingOop = adjustmentReqContext.remainingOop;
+            BigDecimal remainingFamilyOop = adjustmentReqContext.remainingFamilyOop;
+
+            adjustmentRspContext.setAmtApproved(0);
+            adjustmentRspContext.setAmtToPay(amtIncurred);
+            adjustmentRspContext.setDeductible(amtIncurred);
+            adjustmentRspContext.setRemainingDeductible(remainingDeductibles.subtract(amtIncurred));
+            adjustmentRspContext.setCoinsrByClaimant(0);
+            adjustmentRspContext.setOop(amtIncurred);
+            adjustmentRspContext.setRemainingOop(remainingOop.subtract(amtIncurred));
+            adjustmentRspContext.setRemainingFamilyOop(remainingFamilyOop.subtract(amtIncurred));
+            ]]>
+        </node>
+
+        <node id="n4" name="超过个人自付限额" type="script" language="groovy">
+            <![CDATA[
+            BigDecimal amtIncurred = adjustmentReqContext.amtIncurred;
+            BigDecimal remainingOop = adjustmentReqContext.remainingOop;
+            BigDecimal amtApproved = amtIncurred.subtract(remainingOop);
+            BigDecimal remainingDeductibles = adjustmentReqContext.remainingDeductibles;
+            BigDecimal amtToPay = amtIncurred.subtract(amtApproved);
+            BigDecimal remainingFamilyOop = adjustmentReqContext.remainingFamilyOop;
+            adjustmentRspContext.setDeductible(remainingDeductibles);
+            adjustmentRspContext.setAmtApproved(amtApproved);
+            adjustmentRspContext.setAmtToPay(amtToPay);
+            adjustmentRspContext.setRemainingDeductible(0);
+            adjustmentRspContext.setCoinsrByClaimant(amtToPay);
+            adjustmentRspContext.setOop(amtToPay);
+            adjustmentRspContext.setRemainingOop(0);
+            adjustmentRspContext.setRemainingFamilyOop(remainingFamilyOop.subtract(amtIncurred));
+            ]]>
+        </node>
+
+        <node id="n5" name="未超过个人自付限额" type="script" language="groovy">
+            <![CDATA[
+            BigDecimal amtIncurred = adjustmentReqContext.amtIncurred;
+            BigDecimal compensationRatio = adjustmentReqContext.compensationRatio;
+            BigDecimal remainingDeductibles = adjustmentReqContext.remainingDeductibles;
+            BigDecimal remainingOop = adjustmentReqContext.remainingOop;
+            BigDecimal remainingFamilyOop = adjustmentReqContext.remainingFamilyOop;
+            BigDecimal amtApproved = (amtIncurred.subtract(remainingDeductibles)) * compensationRatio;
+            BigDecimal amtToPay = amtIncurred.subtract(amtApproved);
+            adjustmentRspContext.setAmtApproved(amtApproved);
+            adjustmentRspContext.setAmtToPay(amtToPay);
+            adjustmentRspContext.setDeductible(remainingDeductibles);
+            adjustmentRspContext.setRemainingDeductible(0);
+            adjustmentRspContext.setCoinsrByClaimant(amtToPay.subtract(remainingDeductibles));
+            adjustmentRspContext.setOop(amtToPay);
+            adjustmentRspContext.setRemainingOop(remainingOop.subtract(amtToPay));
+            adjustmentRspContext.setRemainingFamilyOop(remainingFamilyOop.subtract(amtToPay));
+            ]]>
+        </node>
+    </nodes>
+
+
+    <chain name="chain">
+        THEN(
+        IF( n1,IF( n2,n4,n5),n3)
+        );
+    </chain>
+</flow>
