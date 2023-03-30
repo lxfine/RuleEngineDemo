@@ -20,10 +20,15 @@ public class LiteFlowTest {
     @Test
     public void simpleTest() {
         AdjustmentReqContext adjustmentReqContext = new AdjustmentReqContext();
-        adjustmentReqContext.setAmtIncurred(new BigDecimal("3517.5"));
-        adjustmentReqContext.setRemainingDeductibles(new BigDecimal("3500"));
-        adjustmentReqContext.setRemainingOop(new BigDecimal("10400.00"));
-        adjustmentReqContext.setRemainingFamilyOop(new BigDecimal("37600.00"));
+        //发生额
+        adjustmentReqContext.setAmtIncurred(new BigDecimal("43630.68"));
+        //剩余免赔额
+        adjustmentReqContext.setRemainingDeductibles(new BigDecimal("0"));
+        //剩余个人OOP
+        adjustmentReqContext.setRemainingOop(new BigDecimal("11600.00"));
+        //剩余家庭OOP
+        adjustmentReqContext.setRemainingFamilyOop(new BigDecimal("38800.00"));
+        //赔付比例
         adjustmentReqContext.setCompensationRatio(new BigDecimal("0.8"));
         AdjustmentRspContext adjustmentRspContext = new AdjustmentRspContext();
         LiteflowResponse response = flowExecutor.execute2Resp("chain", null, adjustmentReqContext, adjustmentRspContext);
@@ -38,13 +43,5 @@ public class LiteFlowTest {
         System.out.println("个人剩余OOP：" + adjustmentRspContext.getRemainingOop());
         System.out.println("家庭剩余OOP：" + adjustmentRspContext.getRemainingFamilyOop());
         System.out.println("剩余免赔额：" + adjustmentRspContext.getRemainingDeductible());
-
-//        TestContext slot = new TestContext();
-//        slot.setCount(110);
-//        slot.setAge(12);
-//        LiteflowResponse response = flowExecutor.execute2Resp("chain1", null, slot);
-//        System.out.println("最终折扣：" + slot.getDisCount());
-//        System.out.println(response.isSuccess());
-//        System.out.println(response.getExecuteStepStr());
     }
 }

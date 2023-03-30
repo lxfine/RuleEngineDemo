@@ -12,11 +12,16 @@
             }
             ]]>
         </node>
-        <node id="n2" name="发生金额超过免赔额，判断发生金额是否超过个人自付限额" type="if_script" language="groovy">
+        <node id="n2" name="发生金额超过免赔额，判断是否超过个人自付限额" type="if_script" language="groovy">
             <![CDATA[
             BigDecimal amtIncurred = adjustmentReqContext.amtIncurred;
+            BigDecimal compensationRatio = adjustmentReqContext.compensationRatio;
+            //批复额
+            BigDecimal amtApproved = amtIncurred * compensationRatio;
+            //未批复
+            BigDecimal amtToPay = amtIncurred.subtract(amtApproved);
             BigDecimal remainingOop = adjustmentReqContext.remainingOop;
-            if (amtIncurred > remainingOop) {
+            if (amtToPay > remainingOop) {
                 return true;
             } else {
                 return false;
